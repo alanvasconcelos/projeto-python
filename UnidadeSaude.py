@@ -2,11 +2,10 @@ from Banco import Banco
 
 class UnidadeSaude(object):
         
-    def __init__(self, codigo = 0, nome = "", qtd = 0):
+    def __init__(self, codigo = 0, nome = ""):
         self.info = {}
         self.codigo = codigo
         self.nome = nome
-        self.qtd = qtd
 
     def inserirUnidade(self):
         banco = Banco()
@@ -14,7 +13,7 @@ class UnidadeSaude(object):
         try:
             c = banco.conexao.cursor()
    
-            c.execute("INSERT INTO unidades VALUES ('" + self.codigo + "', '" + self.nome + "', " + self.qtd + ")")
+            c.execute("INSERT INTO unidades (codigo, nome) VALUES (" + self.codigo + ", '" + self.nome + "')")
             
             banco.conexao.commit()
             c.close()
@@ -29,7 +28,7 @@ class UnidadeSaude(object):
         try:
             c = banco.conexao.cursor()
    
-            c.execute("SELECT * FROM unidades ORDER BY qtd")
+            c.execute("SELECT codigo, nome, COUNT(*) FROM unidades GROUP BY codigo ORDER BY COUNT(*) DESC")
 
             unidades = []
             for linha in c:
@@ -43,4 +42,4 @@ class UnidadeSaude(object):
    
             return unidades
         except:
-            return "Ocorreu um erro ao buscas as unidades"
+            return "Ocorreu um erro ao buscar as unidades"

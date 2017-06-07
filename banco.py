@@ -9,9 +9,9 @@ class Banco():
         c = self.conexao.cursor()
    
         c.execute("""create table if not exists unidades (
-                       codigo integer primary key,
-                       nome text,
-                       qtd integer)""")
+                       id integer primary key,
+                       codigo integer,
+                       nome text)""")
         
         self.conexao.commit()
         c.close()
