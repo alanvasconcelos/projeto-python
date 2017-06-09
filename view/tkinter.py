@@ -1,6 +1,7 @@
 from tkinter import *
+import model
 
-class Application:
+class View:
     def __init__(self, master=None):
         self.widget1 = Frame(master)
         self.widget1.pack()
@@ -33,7 +34,7 @@ class Application:
         self.procurar["command"] = self.procurarUnidade        
         self.procurar.pack()
 
-        self.msg3 = Label(self.widget3, text="Unidades de saúde mais próximas").pack()
+        self.msg3 = Label(self.widget3, text="Unidade de saúde mais próxima").pack()
 
         self.result = Text(self.widget3, width=45, height=5)
         self.result.pack()
@@ -41,9 +42,30 @@ class Application:
     def gerarRelatorio():
         pass
 
-    def procurarUnidade():
-        pass
+    def procurarUnidade(self):
+        longitude = self.getLongitude()
+        latitude = self.getLatitude()
+        netdata = model.NetDataModel()
+        unitHealth = netdata.searchNearUnitHealth(longitude, latitude)
+        self.show(unitHealth)
+
+    def show(self, unSaude):
+        if unSaude:
+            self.result.delete('1.0', END)
+            self.result.insert('1.0', unSaude.nome)
+
+    def getLongitude(self):
+        try:
+            return float(self.longitude.get())
+        except:
+            return 0.0
+
+    def getLatitude(self):
+        try:
+            return float(self.latitude.get())
+        except:
+            return 0.0
     
 root = Tk()
-Application(root)
+View(root)
 root.mainloop()

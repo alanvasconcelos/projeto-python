@@ -57,26 +57,23 @@ class NetDataModel():
         fdata.close()
         return data
 
-    def validarTelefone(self, telefone):
-        if not re.match('\(\d{2}\)\d{8,9}$', telefone):
-            raise model.NumeroTelefoneInvalido(telefone, "Telefone Inválido")
-
     def loadlistfromcsv(self, URL, OUTPUT_PATH="dt.zip", EXTRACTION_PATH="./"):
-        response = request.urlopen(URL)
-        content_length = response.getheader('Content-Length')
-        out_file = io.FileIO(OUTPUT_PATH, mode="w")    
-
-        if content_length:
-            length = int(content_length)
-            self.download_length(response, out_file, length)
-        else:
-            self.download(response, out_file)
+        if (os.path.exists(OUTPUT_PATH) == 0):
+            response = request.urlopen(URL)
+            out_file = io.FileIO(OUTPUT_PATH, mode="w")
+            content_length = response.getheader('Content-Length')
+            if content_length:
+                length = int(content_length)
+                self.download_length(response, out_file, length)
+            else:
+                self.download(response, out_file)
+            response.close()
+            out_file.close()
+        
         zfile = zipfile.ZipFile(OUTPUT_PATH)
         zfile.extractall(EXTRACTION_PATH)
         filename = [name for name in os.listdir(EXTRACTION_PATH) if '.csv' in name]
         dt = self.read_data(EXTRACTION_PATH+filename[0])
-        response.close()
-        out_file.close()
         return dt
 
     def create_cidcnes_index(self, list):
@@ -84,26 +81,8 @@ class NetDataModel():
         for obj in list:
             cidval = obj.magicGet('codCid')
             cnesval = obj.magicGet('codCnes')
-            print(type(obj))
             db[cidval+cnesval] = obj
         return db;
-
-    def create_index_from(self, source, col_index):
-        db = {}
-        for obj in source:
-            index = ""
-            for key in col_index:
-                index += obj.magicGet(key)
-            db[index] = obj
-        return db;
-
-    def interpret(self, line_from_source, col_index, **kargs):
-        line = []
-        for key in kargs:
-            idx = col_index[key]
-            coltype = kargs[key]
-            line.append(coltype(line_from_source[idx]))
-        return line
 
     def syncdata(self):
         RESOURCE_URL = "http://repositorio.dados.gov.br/saude/unidades-saude/unidade-basica-saude/ubs.csv.zip"
@@ -121,6 +100,7 @@ class NetDataModel():
             OUTPUT_PATH = sys.argv[2]
         if len(sys.argv) > 3:
             EXTRACTION_PATH = sys.argv[3]
+        
         self.repository = self.loadlistfromcsv(RESOURCE_URL, OUTPUT_PATH, EXTRACTED_PATH)
 
     def searchNearUnitHealth(self, longitude, latitude):
@@ -136,7 +116,6 @@ class NetDataModel():
 
         for d in db:
             return db[d]
-
 
     def searchAllUnitHealth(self):
         self.syncdata()

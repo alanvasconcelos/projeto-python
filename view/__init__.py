@@ -1,1 +1,1 @@
-from view.tkview import View
+from view.tkinter import View
